@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c0c">
+<title>夜道 / 第一夜</title>
+<style>
+:root{
+  --bg:#0a0b0b; --ink:#d7d8d1; --dim:#777b75; --faint:#353936;
+  --paper:#111313; --line:#252927; --glow:#b9c3b6;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:"Hiragino Mincho ProN","Yu Mincho",serif;overflow:hidden}
+body{touch-action:manipulation;user-select:none}
+#app{height:100dvh;max-width:560px;margin:auto;display:flex;flex-direction:column;padding:max(14px,env(safe-area-inset-top)) 16px max(12px,env(safe-area-inset-bottom));background:
+radial-gradient(circle at 50% 120%,#151817 0,transparent 48%),
+linear-gradient(#090a0a,#0d0f0e)}
+header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding:2px 0 10px}
+.brand{letter-spacing:.32em;font-size:15px}.night{font:11px ui-monospace,monospace;color:var(--dim);letter-spacing:.14em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 0 8px}
+.stat{border:1px solid var(--line);padding:7px 8px;background:#0d0f0e}
+.label{font:9px ui-monospace,monospace;color:var(--dim);letter-spacing:.1em}
+.value{font:15px ui-monospace,monospace;margin-top:2px}
+#road{position:relative;height:58px;overflow:hidden;margin:1px 0 6px}
+.roadline{position:absolute;left:0;right:0;top:28px;height:1px;background:linear-gradient(90deg,transparent,var(--faint) 8%,var(--dim) 50%,var(--faint) 92%,transparent)}
+#walker{position:absolute;left:50%;top:20px;width:3px;height:17px;background:var(--ink);box-shadow:0 0 12px #aeb5aa55}
+#walker:after{content:"";position:absolute;left:-2px;top:-5px;width:7px;height:7px;border:1px solid var(--ink);border-radius:50%}
+.mark{position:absolute;top:24px;width:1px;height:9px;background:var(--faint);opacity:.7}
+#log{flex:1;min-height:0;overflow:hidden;position:relative;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 3px}
+#log:after{content:"";position:absolute;left:0;right:0;bottom:0;height:35%;pointer-events:none;background:linear-gradient(transparent,var(--bg))}
+.entry{font-size:13px;line-height:1.65;margin:0 0 9px;color:#b8bbb5;animation:appear .8s ease}
+.entry .m{font:9px ui-monospace,monospace;color:#555a56;margin-right:8px}
+.entry.strange{color:#d9dcd4;text-shadow:0 0 9px #cad3c033}
+.entry.whisper{color:#777d77;font-size:12px}
+@keyframes appear{from{opacity:0;transform:translateY(3px)}to{opacity:1}}
+#notice{height:26px;padding-top:6px;font-size:10px;color:var(--dim);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{appearance:none;border:1px solid #414641;background:#121513;color:var(--ink);min-height:50px;font:12px "Yu Mincho",serif;letter-spacing:.12em;border-radius:0}
+button:active{background:#222622}
+button:disabled{color:#555;border-color:#242724}
+#walk{grid-column:1/3;min-height:61px;font-size:15px}
+.small{font-size:10px;color:var(--dim);display:block;margin-top:3px;letter-spacing:.04em}
+.drawer{position:absolute;inset:0;background:#0a0c0bf2;z-index:5;padding:max(24px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));display:none;overflow:auto}
+.drawer.open{display:block}
+.drawer h2{font-size:16px;font-weight:normal;letter-spacing:.2em;border-bottom:1px solid var(--line);padding-bottom:10px}
+.card{border-bottom:1px solid var(--line);padding:12px 2px}
+.card b{font-size:13px;font-weight:normal}.card p{font-size:12px;line-height:1.8;color:#92968f;margin:7px 0}
+.close{width:100%;margin-top:14px}
+#choice{display:none;position:absolute;left:16px;right:16px;bottom:calc(142px + env(safe-area-inset-bottom));z-index:3;background:#101211;border:1px solid #3c413d;padding:12px}
+#choice p{font-size:13px;line-height:1.7;margin:0 0 10px}
+#choice .row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#ending{display:none;position:absolute;inset:0;z-index:10;background:#080909;align-items:center;justify-content:center;padding:30px;text-align:center}
+#ending div{max-width:380px}
+#ending p{font-size:14px;line-height:2.2;color:#b8bbb5}
+#ending button{width:100%;margin-top:20px}
+.scan{position:fixed;inset:0;pointer-events:none;opacity:.06;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff 4px)}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="brand">夜道</div><div class="night">第一夜　23:47</div></header>
+<div class="stats">
+ <div class="stat"><div class="label">DISTANCE</div><div class="value" id="distance">0 m</div></div>
+ <div class="stat"><div class="label">RECORD</div><div class="value" id="records">0</div></div>
+ <div class="stat"><div class="label">BEHIND</div><div class="value" id="behind">—</div></div>
+</div>
+<div id="road"><div class="roadline"></div><div id="marks"></div><div id="walker"></div></div>
+<div id="log"></div>
+<div id="notice">家の鍵をポケットに入れた。</div>
+<div class="controls">
+ <button id="walk">歩く<span class="small">画面を押して、少し先へ</span></button>
+ <button id="book">記録帳 <span id="bookCount">0/10</span></button>
+ <button id="auto">自動歩行　OFF</button>
+</div>
+<div id="choice"><p id="choiceText"></p><div class="row"><button id="yes"></button><button id="no"></button></div></div>
+<div class="drawer" id="drawer"><h2>記録帳</h2><div id="cards"></div><button class="close" id="close">閉じる</button></div>
+<div id="ending"><div><div class="brand">帰宅</div><p id="endingText"></p><button id="again">もう一度、玄関を開ける</button></div></div>
+</div>
+<div class="scan"></div>
+<script>
+const $=s=>document.querySelector(s);
+let dist=0, rec=0, behind=null, auto=false, timer=null, ended=false;
+let flags={}, discovered=new Set(), lastGeneric=-1;
+const log=$("#log"), notice=$("#notice");
+const generic=[
+"住宅の窓。青いテレビの光だけが動いている。",
+"側溝から水の音がする。",
+"駐車場。白い軽自動車が一台。",
+"閉まった美容室。回転灯だけが残っている。",
+"電柱の影が、次の電柱まで届いている。",
+"小さな公園。ブランコは止まっている。",
+"植木鉢が道路ぎりぎりまで並んでいる。",
+"二階だけ明るいアパート。",
+"遠くでバイクが走った。姿は見えない。",
+"道路に輪ゴムが落ちている。",
+"玄関灯に蛾が集まっている。",
+"知らない家の風鈴が一度だけ鳴った。",
+"ゴミ集積所。今日は回収日ではない。",
+"自販機。水だけ売り切れている。",
+"古い選挙ポスター。顔の部分が白く褪せている。",
+"室外機の低い音。",
+"カーブミラー。こちら側だけ曇っている。",
+"犬が一度吠えた。それきり。",
+"ベランダに洗濯物。風はない。",
+"道路の白線が途中でなくなっている。",
+"小学校のフェンス。校庭は見えない。",
+"自転車が一台、鍵をかけずに停めてある。",
+"排水口にコンビニのレシートが張り付いている。",
+"猫が道路を横切った。",
+"空き地。草の匂いが濃い。",
+"郵便受けに新聞が二日分。",
+"坂道。上りきったところは暗い。",
+"遠くの信号が赤から青に変わった。",
+"シャッターに知らない店名の跡。",
+"誰かの咳がした。家の中だと思う。",
+"道端に軍手が片方。",
+"水たまりに街灯が映っている。",
+"フェンスの向こうに細い通路が続いている。",
+"コインパーキング。料金表示が消えている。",
+"アパートの階段にビニール傘。",
+"どこかで電子レンジの終了音。",
+"電線が多い。空が細く見える。",
+"植え込みの中に空き缶。",
+"道路工事の看板。工事日は去年になっている。",
+"遠くで踏切が鳴っている。線路はこの辺りにはない。"
+];
+const notes={
+ road:["道","家から続いている道路。夜に歩くと、昼より少し長い。"],
+ canal:["用水路","住宅地の脇を流れている。水は黒く、流れる方向が分かりにくい。"],
+ glove:["片方の軍手","道端に落ちている。拾わなかった。たぶん。"],
+ machine:["青い自販機","水だけ売り切れている。商品見本の奥が妙に暗い。"],
+ shrine:["小さな社","地図にはない。鳥居より奥が住宅のはずなのに、木が続いている。"],
+ stone:["平たい石","用水路の中にある。石だと思っていた。"],
+ person:["前を歩く人","追いつけない。立ち止まると向こうも止まる。"],
+ back:["背後","振り返って確認するための場所ではない。"],
+ receipt:["レシート","午前3:12。まだ午前0時にもなっていない。"],
+ home:["自宅","帰る場所。今夜もそこにある。"]
+};
+function add(text,cls=""){
+ let p=document.createElement("p"); p.className="entry "+cls;
+ p.innerHTML=`<span class="m">${Math.floor(dist)}m</span>${text}`;
+ log.prepend(p); while(log.children.length>13) log.lastChild.remove();
+}
+function discover(k,extra){
+ if(discovered.has(k)) return;
+ discovered.add(k); rec++; $("#records").textContent=rec; $("#bookCount").textContent=`${rec}/10`;
+ notice.textContent="記録帳に追記された："+notes[k][0];
+ if(extra) notes[k][1]=extra;
+}
+function update(){
+ $("#distance").textContent=dist<1000?`${Math.floor(dist)} m`:`${(dist/1000).toFixed(2)} km`;
+ if(dist>=850 && behind===null){behind=0;$("#behind").textContent="0";discover("back")}
+ if(behind!==null) $("#behind").textContent=behind;
+ $("#auto").disabled=dist<420;
+}
+function choose(text,a,b,fa,fb){
+ auto=false; clearInterval(timer); $("#auto").textContent="自動歩行　OFF";
+ $("#choiceText").textContent=text; $("#yes").textContent=a; $("#no").textContent=b; $("#choice").style.display="block";
+ $("#yes").onclick=()=>{$("#choice").style.display="none";fa()};
+ $("#no").onclick=()=>{$("#choice").style.display="none";fb()};
+}
+function eventCheck(){
+ if(dist>=80&&!flags.road){flags.road=1;discover("road");add("角を二つ曲がった。家はもう見えない。")}
+ if(dist>=260&&!flags.machine){flags.machine=1;discover("machine");add("青い自販機がある。水だけ売り切れている。","strange")}
+ if(dist>=420&&!flags.auto){flags.auto=1;notice.textContent="歩くことを考えなくても、歩けるようになった。";add("足が道順を覚えた。","whisper")}
+ if(dist>=610&&!flags.glove){flags.glove=1;discover("glove");add("道端に軍手が片方。","strange")}
+ if(dist>=760&&!flags.glove2){flags.glove2=1;add("道端に軍手が片方。","strange")}
+ if(dist>=930&&!flags.glove3){flags.glove3=1;add("さっきもあった。","strange")}
+ if(dist>=1080&&!flags.canal){flags.canal=1;discover("canal");add("用水路。水の音が道路の進行方向から聞こえる。","strange")}
+ if(dist>=1260&&!flags.choiceCanal){flags.choiceCanal=1;choose("用水路の中に、渡れそうな平たいものが並んでいる。近道になる。","渡る","道を歩く",
+ ()=>{dist+=190;discover("stone");flags.crossed=1;add("三つ目だけ、踏んだときに少し沈んだ。","strange");update()},
+ ()=>{add("水路沿いを歩く。後ろで、水をかく音が一度した。","whisper"); behind=1;update()}
+ )}
+ if(dist>=1580&&!flags.person){flags.person=1;discover("person");add("前に人がいる。ずっと同じ距離を歩いている。","strange")}
+ if(dist>=1780&&!flags.person2){flags.person2=1;add("前の人が立ち止まった。こちらも立ち止まった。","strange")}
+ if(dist>=1960&&!flags.shrine){flags.shrine=1;discover("shrine");choose("右手に細い鳥居がある。奥に灯りはない。","入る","通り過ぎる",
+ ()=>{add("鳥居をくぐった。土の匂い。十歩で、同じ道路に出た。","strange");dist+=70;flags.shrineIn=1;update()},
+ ()=>{add("通り過ぎる。しばらくして、左手に同じ鳥居があった。","strange");behind=(behind||0)+1;update()}
+ )}
+ if(dist>=2250&&!flags.receipt){flags.receipt=1;discover("receipt");add("レシートが落ちている。印字は「03:12」。","strange")}
+ if(dist>=2460&&!flags.back1){flags.back1=1;behind=(behind||0)+1;add("足音がひとつ多い気がする。数えないことにした。","whisper");update()}
+ if(dist>=2700&&!flags.homeChoice){flags.homeChoice=1;discover("home");choose("見覚えのある角だ。ここを曲がれば家に戻れる。","帰る","もう少し歩く",
+ ()=>finish(false),
+ ()=>{flags.pastHome=1;add("角を曲がらなかった。背後で玄関の鍵が開く音がした。","strange");behind=(behind||0)+1;update()}
+ )}
+ if(dist>=3050&&flags.pastHome&&!ended){finish(true)}
+}
+function walk(){
+ if(ended||$("#choice").style.display==="block")return;
+ let step=18+Math.random()*20; dist+=step;
+ if(Math.random()<.58){
+   let i=Math.floor(Math.random()*generic.length); if(i===lastGeneric)i=(i+1)%generic.length; lastGeneric=i; add(generic[i]);
+ }
+ eventCheck(); update();
+}
+function finish(late){
+ ended=true; auto=false;clearInterval(timer);
+ $("#ending").style.display="flex";
+ $("#endingText").innerHTML=late
+ ?`玄関は開いていた。<br><br>靴が一足、多い。<br>自分の靴だった。<br><br><span style="color:#666">第一夜　終了<br>${Math.floor(dist)}m / 記録 ${rec}/10 / 背後 ${behind}</span>`
+ :`鍵を開けた。<br>部屋は出たときのままだった。<br><br>靴を脱いでから、<br>まだ足音がしていることに気づいた。<br><br><span style="color:#666">第一夜　終了<br>${Math.floor(dist)}m / 記録 ${rec}/10 / 背後 ${behind??0}</span>`;
+}
+$("#walk").onclick=walk;
+$("#auto").onclick=()=>{
+ if(dist<420)return; auto=!auto; $("#auto").textContent="自動歩行　"+(auto?"ON":"OFF");
+ clearInterval(timer); if(auto)timer=setInterval(walk,900);
+};
+$("#book").onclick=()=>{
+ $("#cards").innerHTML="";
+ Object.keys(notes).forEach(k=>{
+  let d=document.createElement("div");d.className="card";
+  d.innerHTML=discovered.has(k)?`<b>${notes[k][0]}</b><p>${notes[k][1]}</p>`:`<b style="color:#444">？？？？</b><p>まだ記録されていない。</p>`;
+  $("#cards").appendChild(d);
+ }); $("#drawer").classList.add("open");
+};
+$("#close").onclick=()=>$("#drawer").classList.remove("open");
+$("#again").onclick=()=>location.reload();
+add("玄関を出た。鍵を閉めたかどうか、もう思い出せない。","whisper");
+update();
+</script>
+</body>
+</html>
